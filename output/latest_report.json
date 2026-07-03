@@ -1,0 +1,110 @@
+{
+  "rows_loaded": 2665,
+  "first_draw": "2019-03-10",
+  "latest_draw": "2026-07-02",
+  "top10_combinations": [
+    {
+      "combination": "4-7-10-25-36",
+      "sum": 82,
+      "odd_count": 2,
+      "low_count": 3,
+      "score": 48.732
+    },
+    {
+      "combination": "4-5-10-25-36",
+      "sum": 80,
+      "odd_count": 2,
+      "low_count": 3,
+      "score": 48.723
+    },
+    {
+      "combination": "4-9-10-25-36",
+      "sum": 84,
+      "odd_count": 2,
+      "low_count": 3,
+      "score": 48.415
+    },
+    {
+      "combination": "4-10-14-25-27",
+      "sum": 80,
+      "odd_count": 2,
+      "low_count": 3,
+      "score": 48.247
+    },
+    {
+      "combination": "4-7-10-25-30",
+      "sum": 76,
+      "odd_count": 2,
+      "low_count": 3,
+      "score": 48.246
+    },
+    {
+      "combination": "1-4-10-25-36",
+      "sum": 76,
+      "odd_count": 2,
+      "low_count": 3,
+      "score": 48.028
+    },
+    {
+      "combination": "4-5-10-22-25",
+      "sum": 66,
+      "odd_count": 2,
+      "low_count": 3,
+      "score": 48.008
+    },
+    {
+      "combination": "4-5-10-25-30",
+      "sum": 74,
+      "odd_count": 2,
+      "low_count": 3,
+      "score": 47.997
+    },
+    {
+      "combination": "4-7-10-22-25",
+      "sum": 68,
+      "odd_count": 2,
+      "low_count": 3,
+      "score": 47.996
+    },
+    {
+      "combination": "4-10-14-25-31",
+      "sum": 84,
+      "odd_count": 2,
+      "low_count": 3,
+      "score": 47.955
+    }
+  ],
+  "top3_numbers": [
+    {
+      "number": 10,
+      "long_count": 416,
+      "recent_20_count": 3,
+      "recent_50_count": 11,
+      "gap": 5,
+      "score": 60.303
+    },
+    {
+      "number": 25,
+      "long_count": 395,
+      "recent_20_count": 6,
+      "recent_50_count": 9,
+      "gap": 1,
+      "score": 56.571
+    },
+    {
+      "number": 4,
+      "long_count": 382,
+      "recent_20_count": 5,
+      "recent_50_count": 11,
+      "gap": 1,
+      "score": 49.978
+    }
+  ],
+  "over_under_92_5": {
+    "prediction": "Under 92.5",
+    "confidence": 58.31,
+    "prob_over": 41.69,
+    "prob_under": 58.31,
+    "recent_avg_sum": 81.9
+  }
+}
