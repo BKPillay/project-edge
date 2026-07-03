@@ -18,9 +18,7 @@ features = add_draw_features(df)
 
 with st.sidebar:
     st.header("➕ Add new draw")
-
     draw_date = st.date_input("Draw date")
-
     st.write("Enter 5 unique numbers from 1 to 36.")
     cols = st.columns(5)
     nums = [
@@ -30,50 +28,36 @@ with st.sidebar:
         cols[3].number_input("N4", min_value=1, max_value=36, value=4, step=1),
         cols[4].number_input("N5", min_value=1, max_value=36, value=5, step=1),
     ]
-
     overwrite_existing = st.checkbox("Replace existing draw if date already exists", value=True)
 
     if st.button("Save draw", use_container_width=True):
         new_nums = sorted([int(n) for n in nums])
-
         if len(set(new_nums)) != 5:
             st.error("The 5 numbers must be unique.")
-        elif any(n < 1 or n > 36 for n in new_nums):
-            st.error("All numbers must be between 1 and 36.")
         else:
             draw_date_ts = pd.to_datetime(draw_date)
-
             existing_date = df["draw_date"].dt.date.eq(draw_date_ts.date()).any()
-
             if existing_date and not overwrite_existing:
-                st.error("That draw date already exists. Tick the replace option to overwrite it.")
+                st.error("That draw date already exists. Tick replace to overwrite it.")
             else:
                 new_row = pd.DataFrame([{
                     "draw_date": draw_date_ts,
-                    "n1": new_nums[0],
-                    "n2": new_nums[1],
-                    "n3": new_nums[2],
-                    "n4": new_nums[3],
-                    "n5": new_nums[4],
+                    "n1": new_nums[0], "n2": new_nums[1], "n3": new_nums[2],
+                    "n4": new_nums[3], "n5": new_nums[4],
                 }])
-
                 updated = pd.concat([df, new_row], ignore_index=True)
-
                 if overwrite_existing:
                     updated = updated.drop_duplicates(subset=["draw_date"], keep="last")
-
                 updated = updated.sort_values("draw_date").reset_index(drop=True)
                 updated.to_csv(DATA_PATH, index=False)
-
                 st.success(f"Saved draw: {draw_date_ts.date()} — {'-'.join(map(str, new_nums))}")
                 st.info("Refresh the app to recalculate the model with the new record.")
 
     st.divider()
     st.header("⬇️ Export data")
-    csv_data = df.to_csv(index=False).encode("utf-8")
     st.download_button(
         "Download history CSV",
-        data=csv_data,
+        data=df.to_csv(index=False).encode("utf-8"),
         file_name="daily_lotto_history.csv",
         mime="text/csv",
         use_container_width=True
@@ -92,15 +76,13 @@ with st.sidebar:
                 uploaded_df["draw_date"] = pd.to_datetime(uploaded_df["draw_date"])
                 for c in ["n1", "n2", "n3", "n4", "n5"]:
                     uploaded_df[c] = pd.to_numeric(uploaded_df[c], errors="raise").astype(int)
-
-                invalid_rows = []
+                bad = []
                 for i, row in uploaded_df.iterrows():
                     vals = [row["n1"], row["n2"], row["n3"], row["n4"], row["n5"]]
                     if len(set(vals)) != 5 or any(v < 1 or v > 36 for v in vals):
-                        invalid_rows.append(i + 2)
-
-                if invalid_rows:
-                    st.error(f"Invalid numbers found in CSV rows: {invalid_rows[:10]}")
+                        bad.append(i + 2)
+                if bad:
+                    st.error(f"Invalid rows found: {bad[:10]}")
                 elif st.button("Replace app history with uploaded CSV", use_container_width=True):
                     uploaded_df = uploaded_df.sort_values("draw_date").drop_duplicates(subset=["draw_date"], keep="last")
                     uploaded_df.to_csv(DATA_PATH, index=False)
