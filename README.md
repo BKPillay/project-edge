@@ -1,15 +1,12 @@
-# EDGE AI v6
+# EDGE AI v8 — Cached Back-tests + Latest Draw Review
 
-UI overhaul plus expanded prediction page.
+## New in v8
 
-Added:
-- Dark card-style UI
-- Proper Over/Under card instead of raw JSON/dictionary display
-- Individual prediction table with slider
-- Pair prediction table with slider
-- Triplet prediction table with slider
-- Combination prediction slider
-- Cleaner dashboard cards
-- .gitignore
+- Cached prediction outputs so page clicks are faster
+- Cached/sampled back-testing to avoid Streamlit hanging
+- New Latest Draw Review page
+- Ball-by-ball pre-draw rank and score review
+- Pair and triplet review for the latest draw
+- Clear distinction between model score and true probability
 
-Deploy: copy files into your GitHub repo, commit, and push. Streamlit redeploys automatically.
+Deploy by replacing your repo files, committing, and pushing to Streamlit.
