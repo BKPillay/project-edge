@@ -24,8 +24,8 @@ st.markdown("""
 <style>
 .stApp {
     background:
-      radial-gradient(circle at top left, rgba(95,68,255,.16), transparent 30%),
-      radial-gradient(circle at top right, rgba(30,144,255,.12), transparent 28%),
+      radial-gradient(circle at top left, rgba(95,68,255,.14), transparent 28%),
+      radial-gradient(circle at top right, rgba(30,144,255,.10), transparent 28%),
       linear-gradient(180deg, #07111f 0%, #050b14 100%);
     color: #eef4ff;
 }
@@ -33,36 +33,36 @@ st.markdown("""
     background: linear-gradient(180deg, #081422 0%, #050b14 100%);
     border-right: 1px solid rgba(120,145,180,.22);
 }
-.block-container { padding-top: 1.4rem; max-width: 1500px; }
-.edge-title { font-size: 2.2rem; font-weight: 900; margin-bottom: .1rem; }
+.block-container { padding-top: 1.25rem; max-width: 1500px; }
+.edge-title { font-size: 2.1rem; font-weight: 900; margin-bottom: .1rem; }
 .edge-ai { color: #9b5cff; }
-.edge-subtitle { color: #9fb0c7; margin-bottom: 1.2rem; }
+.edge-subtitle { color: #9fb0c7; margin-bottom: 1rem; }
 .edge-card {
     background: linear-gradient(180deg, rgba(14,31,56,.92), rgba(7,17,31,.92));
     border: 1px solid rgba(120,145,180,.22);
     border-radius: 14px;
-    padding: 1.1rem 1.25rem;
-    box-shadow: 0 12px 30px rgba(0,0,0,.22);
-    min-height: 120px;
+    padding: 1.0rem 1.15rem;
+    box-shadow: 0 12px 30px rgba(0,0,0,.20);
+    min-height: 115px;
 }
-.edge-label { color:#9fb0c7; font-size:.88rem; margin-bottom:.25rem; }
-.edge-big-green { color:#39d975; font-size:2.0rem; font-weight:900; line-height:1.05; }
-.edge-big-blue { color:#3f8cff; font-size:1.55rem; font-weight:800; }
+.edge-label { color:#9fb0c7; font-size:.86rem; margin-bottom:.25rem; }
+.edge-big-green { color:#39d975; font-size:1.9rem; font-weight:900; line-height:1.05; }
+.edge-big-blue { color:#3f8cff; font-size:1.45rem; font-weight:800; }
 .edge-pill {
     display:inline-block; border:1px solid rgba(155,92,255,.85); border-radius:999px;
-    padding:.35rem .58rem; margin:.15rem .18rem .15rem 0; min-width:40px;
+    padding:.32rem .55rem; margin:.12rem .15rem .12rem 0; min-width:38px;
     text-align:center; background:rgba(155,92,255,.09); font-weight:800;
 }
 .edge-pill.blue { border-color:rgba(63,140,255,.85); background:rgba(63,140,255,.09); }
 .edge-progress { height:8px; border-radius:999px; background:rgba(255,255,255,.12); overflow:hidden; margin:.5rem 0; }
 .edge-progress > div { height:100%; border-radius:999px; background:linear-gradient(90deg,#39d975,#9b5cff); }
-.edge-grid { display:grid; grid-template-columns:repeat(5,minmax(54px,1fr)); gap:.75rem; margin-top:.6rem; }
+.edge-grid { display:grid; grid-template-columns:repeat(5,minmax(50px,1fr)); gap:.6rem; margin-top:.5rem; }
 .edge-number-bubble {
-    border:1px solid #39d975; border-radius:999px; height:54px; width:54px;
+    border:1px solid #39d975; border-radius:999px; height:50px; width:50px;
     display:flex; align-items:center; justify-content:center; font-weight:900; margin:auto;
     background:rgba(57,217,117,.08);
 }
-.edge-score { text-align:center; color:#9fb0c7; font-size:.82rem; margin-top:.25rem; }
+.edge-score { text-align:center; color:#9fb0c7; font-size:.8rem; margin-top:.2rem; }
 div[data-testid="stDataFrame"] { border:1px solid rgba(120,145,180,.22); border-radius:12px; overflow:hidden; }
 </style>
 """, unsafe_allow_html=True)
@@ -74,7 +74,7 @@ def card(title: str, body: str, footer: str = ""):
         <div class="edge-card">
           <div class="edge-label">{title}</div>
           {body}
-          <div style="color:#9fb0c7;font-size:.82rem;margin-top:.65rem;">{footer}</div>
+          <div style="color:#9fb0c7;font-size:.82rem;margin-top:.6rem;">{footer}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -95,15 +95,25 @@ def number_grid(numbers_df: pd.DataFrame):
 
 
 @st.cache_data(show_spinner=False)
-def load_all():
-    df = load_history(DATA_PATH)
+def load_base_data(path_str: str):
+    df = load_history(path_str)
     features = add_draw_features(df)
+    return df, features
+
+
+@st.cache_data(show_spinner=False)
+def compute_core_outputs(path_str: str):
+    df = load_history(path_str)
     numbers = number_scores(df)
     ou = over_under_prediction(df)
-    return df, features, numbers, ou
+    # Compute maximum table sizes once. Sliders only slice these results.
+    pairs = pair_predictions(df, 50)
+    triplets = triplet_predictions(df, 50)
+    combos = fast_combos_from_numbers(numbers, 50)
+    return numbers, pairs, triplets, combos, ou
 
 
-def fast_combos(numbers_df: pd.DataFrame, top_n: int = 10, pool_size: int = 15) -> pd.DataFrame:
+def fast_combos_from_numbers(numbers_df: pd.DataFrame, top_n: int = 50, pool_size: int = 15) -> pd.DataFrame:
     pool = numbers_df.head(pool_size).copy()
     score_map = dict(zip(pool["Number"].astype(int), pool["Score"].astype(float)))
     rows = []
@@ -114,12 +124,15 @@ def fast_combos(numbers_df: pd.DataFrame, top_n: int = 10, pool_size: int = 15) 
         odd = sum(n % 2 for n in combo)
         low = sum(n <= 18 for n in combo)
         prime = sum(n in primes for n in combo)
+
         structure_bonus = 0
         structure_bonus += 5 if 65 <= total <= 120 else 0
         structure_bonus += 4 if odd in (2, 3) else 0
         structure_bonus += 4 if low in (2, 3) else 0
+
         avg_score = float(np.mean([score_map[n] for n in combo]))
         final_score = round(avg_score + structure_bonus, 2)
+
         rows.append({
             "Rank": None,
             "Combination": "-".join(map(str, combo)),
@@ -137,11 +150,74 @@ def fast_combos(numbers_df: pd.DataFrame, top_n: int = 10, pool_size: int = 15) 
     return out
 
 
+def latest_draw_review_light(df: pd.DataFrame, numbers_df: pd.DataFrame, pairs_df: pd.DataFrame, triplets_df: pd.DataFrame, ou: dict):
+    if len(df) < 2:
+        return None
+
+    pre_numbers = numbers_df.copy()
+    latest = df.iloc[-1]
+    latest_numbers = sorted([int(latest[c]) for c in NUMBER_COLS])
+    actual_sum = sum(latest_numbers)
+    actual_ou = "Over 92.5" if actual_sum > 92.5 else "Under 92.5"
+
+    nmap = pre_numbers.set_index("Number").to_dict(orient="index")
+
+    ball_rows = []
+    for n in latest_numbers:
+        info = nmap.get(n)
+        if info is None:
+            continue
+        rank = int(info["Rank"])
+        if rank <= 3:
+            insight = "Elite pre-draw pick"
+        elif rank <= 10:
+            insight = "Strong pre-draw pick"
+        elif rank <= 20:
+            insight = "Mid-table model pick"
+        else:
+            insight = "Model underweighted this ball"
+
+        ball_rows.append({
+            "Ball": n,
+            "Pre-draw Rank": rank,
+            "Model Score": float(info["Score"]),
+            "Last 20": int(info["Last 20"]),
+            "Last 50": int(info["Last 50"]),
+            "Gap": int(info["Gap"]),
+            "Insight": insight,
+        })
+
+    pair_set = set()
+    for a, b in itertools.combinations(latest_numbers, 2):
+        pair_set.add(f"{a}-{b}")
+
+    triplet_set = set()
+    for t in itertools.combinations(latest_numbers, 3):
+        triplet_set.add("-".join(map(str, t)))
+
+    pairs_hit = pairs_df[pairs_df["Pair"].isin(pair_set)].copy() if "Pair" in pairs_df.columns else pd.DataFrame()
+    triplets_hit = triplets_df[triplets_df["Triplet"].isin(triplet_set)].copy() if "Triplet" in triplets_df.columns else pd.DataFrame()
+
+    return {
+        "draw_date": str(latest["draw_date"].date()),
+        "numbers": latest_numbers,
+        "actual_sum": actual_sum,
+        "actual_ou": actual_ou,
+        "ou_prediction": ou["prediction"],
+        "ou_correct": ou["prediction"] == actual_ou,
+        "top3_hits": len(set(latest_numbers) & set(numbers_df.head(3)["Number"].astype(int).tolist())),
+        "ball_review": pd.DataFrame(ball_rows),
+        "pairs_hit": pairs_hit,
+        "triplets_hit": triplets_hit,
+    }
+
+
 if not DATA_PATH.exists():
     st.error("Missing data/daily_lotto_history.csv")
     st.stop()
 
-df, features, numbers_df, ou = load_all()
+df, features = load_base_data(str(DATA_PATH))
+numbers_df, pairs_df, triplets_df, combos_df, ou = compute_core_outputs(str(DATA_PATH))
 
 with st.sidebar:
     st.markdown("<div class='edge-title'>EDGE <span class='edge-ai'>AI</span></div>", unsafe_allow_html=True)
@@ -149,7 +225,7 @@ with st.sidebar:
 
     page = st.radio(
         "Navigation",
-        ["Dashboard", "Predictions", "Analytics", "History / Updates"],
+        ["Dashboard", "Predictions", "Latest Draw Review", "Analytics", "History / Updates"],
         label_visibility="collapsed",
     )
 
@@ -197,7 +273,7 @@ with st.sidebar:
 
 if page == "Dashboard":
     st.markdown("<div class='edge-title'>Dashboard</div>", unsafe_allow_html=True)
-    st.markdown("<div class='edge-subtitle'>Fast summary from the model.</div>", unsafe_allow_html=True)
+    st.markdown("<div class='edge-subtitle'>Fast summary from precomputed model outputs.</div>", unsafe_allow_html=True)
 
     latest = features.iloc[-1]
     c1, c2, c3, c4 = st.columns(4)
@@ -211,16 +287,21 @@ if page == "Dashboard":
         card("Latest Structure", f"<div class='edge-big-blue'>{latest['odd_count']}O/{latest['even_count']}E</div>", f"{latest['low_count']} Low / {latest['high_count']} High")
 
     st.divider()
-    st.subheader("Top 3 Numbers")
-    number_grid(numbers_df.head(3))
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.subheader("Top 3 Numbers")
+        number_grid(numbers_df.head(3))
+    with col2:
+        st.subheader("Over / Under")
+        st.metric(ou["prediction"], f'{ou["confidence"]}% confidence')
 
     st.subheader("Top 10 Combinations")
-    st.dataframe(fast_combos(numbers_df, 10), use_container_width=True, hide_index=True)
+    st.dataframe(combos_df.head(10), use_container_width=True, hide_index=True)
 
 
 elif page == "Predictions":
     st.markdown("<div class='edge-title'>Predictions</div>", unsafe_allow_html=True)
-    st.markdown("<div class='edge-subtitle'>Individual, pair, triplet, combination, and Over/Under outputs.</div>", unsafe_allow_html=True)
+    st.markdown("<div class='edge-subtitle'>Outputs load once. Sliders only slice precomputed results.</div>", unsafe_allow_html=True)
 
     control_cols = st.columns(4)
     with control_cols[0]:
@@ -231,11 +312,6 @@ elif page == "Predictions":
         show_triplets = st.slider("Triplets", 5, 50, 10)
     with control_cols[3]:
         show_combos = st.slider("Combinations", 5, 50, 10)
-
-    with st.spinner("Loading prediction outputs..."):
-        pairs_df = pair_predictions(df, show_pairs)
-        triplets_df = triplet_predictions(df, show_triplets)
-        combos_df = fast_combos(numbers_df, show_combos)
 
     top3 = numbers_df.head(3)
     combo_top = combos_df.iloc[0]
@@ -280,25 +356,78 @@ elif page == "Predictions":
 
     with tab2:
         st.subheader(f"Top {show_pairs} Pair Predictions")
-        st.dataframe(pairs_df, use_container_width=True, hide_index=True)
+        st.dataframe(pairs_df.head(show_pairs), use_container_width=True, hide_index=True)
 
     with tab3:
         st.subheader(f"Top {show_triplets} Triplet Predictions")
-        st.dataframe(triplets_df, use_container_width=True, hide_index=True)
+        st.dataframe(triplets_df.head(show_triplets), use_container_width=True, hide_index=True)
 
     with tab4:
         st.subheader(f"Top {show_combos} Combination Predictions")
         st.caption("Fast candidate-based ranking from the top individual numbers.")
-        st.dataframe(combos_df, use_container_width=True, hide_index=True)
+        st.dataframe(combos_df.head(show_combos), use_container_width=True, hide_index=True)
+
+
+elif page == "Latest Draw Review":
+    st.markdown("<div class='edge-title'>Latest Draw Review</div>", unsafe_allow_html=True)
+    st.markdown("<div class='edge-subtitle'>Lightweight review using already-computed rankings.</div>", unsafe_allow_html=True)
+
+    review = latest_draw_review_light(df, numbers_df, pairs_df, triplets_df, ou)
+
+    if review is None:
+        st.warning("Need at least two draws.")
+    else:
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            card("Draw Date", f"<div class='edge-big-blue'>{review['draw_date']}</div>")
+        with c2:
+            pills = "".join([f"<span class='edge-pill'>{n:02d}</span>" for n in review["numbers"]])
+            card("Winning Numbers", f"<div>{pills}</div>", f"Sum: {review['actual_sum']}")
+        with c3:
+            status = "✅ Correct" if review["ou_correct"] else "❌ Missed"
+            card("Over / Under", f"<div class='edge-big-green'>{status}</div>", f"Predicted {review['ou_prediction']}")
+        with c4:
+            card("Top 3 Hit Count", f"<div class='edge-big-blue'>{review['top3_hits']} / 3</div>")
+
+        st.divider()
+        st.subheader("Ball-by-ball Review")
+        st.dataframe(review["ball_review"], use_container_width=True, hide_index=True)
+
+        st.subheader("Pairs from Latest Draw that were in Top 50")
+        if len(review["pairs_hit"]):
+            st.dataframe(review["pairs_hit"], use_container_width=True, hide_index=True)
+        else:
+            st.info("None of the latest draw pairs appeared in the current top 50 pair rankings.")
+
+        st.subheader("Triplets from Latest Draw that were in Top 50")
+        if len(review["triplets_hit"]):
+            st.dataframe(review["triplets_hit"], use_container_width=True, hide_index=True)
+        else:
+            st.info("None of the latest draw triplets appeared in the current top 50 triplet rankings.")
 
 
 elif page == "Analytics":
     st.markdown("<div class='edge-title'>Analytics</div>", unsafe_allow_html=True)
-    st.dataframe(numbers_df, use_container_width=True, hide_index=True)
-    st.bar_chart(numbers_df.set_index("Number")["Score"])
+    st.markdown("<div class='edge-subtitle'>Lightweight analytics only. Heavy back-tests have been removed from live page loading.</div>", unsafe_allow_html=True)
+
+    tab1, tab2, tab3, tab4 = st.tabs(["Numbers", "Pairs", "Triplets", "Sums"])
+    with tab1:
+        st.dataframe(numbers_df, use_container_width=True, hide_index=True)
+        st.bar_chart(numbers_df.set_index("Number")["Score"])
+    with tab2:
+        st.dataframe(pairs_df, use_container_width=True, hide_index=True)
+    with tab3:
+        st.dataframe(triplets_df, use_container_width=True, hide_index=True)
+    with tab4:
+        st.line_chart(features.set_index("draw_date")["sum"])
 
 
 elif page == "History / Updates":
     st.markdown("<div class='edge-title'>History / Updates</div>", unsafe_allow_html=True)
     st.info("On free Streamlit, manual changes may not persist forever. Download the CSV and commit it to GitHub.")
-    st.dataframe(features.sort_values("draw_date", ascending=False), use_container_width=True, hide_index=True)
+
+    show_history = st.checkbox("Show full history table", value=False)
+    if show_history:
+        st.dataframe(features.sort_values("draw_date", ascending=False), use_container_width=True, hide_index=True)
+    else:
+        st.dataframe(features.sort_values("draw_date", ascending=False).head(20), use_container_width=True, hide_index=True)
