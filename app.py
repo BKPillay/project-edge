@@ -1,4 +1,5 @@
 from pathlib import Path
+import itertools
 import pandas as pd
 import streamlit as st
 from src.edge_model import (
@@ -41,7 +42,12 @@ def cached_load(path):
 @st.cache_data(show_spinner=False)
 def cached_predictions(path, combo_n, pair_n, triplet_n):
     df = load_history(path)
-    return number_scores(df), combination_scores(df, combo_n), pair_predictions(df, pair_n), triplet_predictions(df, triplet_n), over_under_prediction(df)
+    ns = number_scores(df)
+    combos = fast_combination_predictions(ns, combo_n)
+    pairs = pair_predictions(df, pair_n)
+    trips = triplet_predictions(df, triplet_n)
+    ou = over_under_prediction(df)
+    return ns, combos, pairs, trips, ou
 
 @st.cache_data(show_spinner=False)
 def cached_latest_review(path):
@@ -61,6 +67,39 @@ def number_grid(numbers_df):
         html += f"<div><div class='edge-number-bubble'>{int(row['Number']):02d}</div><div class='edge-score'>{row['Score']}</div></div>"
     html += '</div>'
     st.markdown(html, unsafe_allow_html=True)
+
+
+def fast_combination_predictions(numbers_df, top_n=10, candidate_pool=18):
+    """Fast candidate-based combo ranking so the Predictions page does not hang."""
+    pool_df = numbers_df.head(candidate_pool).copy()
+    score_map = {int(row['Number']): float(row['Score']) for _, row in pool_df.iterrows()}
+    prime_set = {2,3,5,7,11,13,17,19,23,29,31}
+    rows = []
+    for combo in itertools.combinations(sorted(score_map.keys()), 5):
+        total = sum(combo)
+        odd = sum(n % 2 for n in combo)
+        low = sum(n <= 18 for n in combo)
+        prime = sum(n in prime_set for n in combo)
+        avg_score = sum(score_map[n] for n in combo) / 5
+        structure_bonus = 0
+        structure_bonus += 5 if 65 <= total <= 120 else 0
+        structure_bonus += 4 if odd in (2, 3) else 0
+        structure_bonus += 4 if low in (2, 3) else 0
+        final_score = round(avg_score + structure_bonus, 2)
+        rows.append({
+            'Rank': None,
+            'Combination': '-'.join(map(str, combo)),
+            'Score': final_score,
+            'Sum': total,
+            'Odd': odd,
+            'Even': 5 - odd,
+            'Low': low,
+            'High': 5 - low,
+            'Prime': prime,
+        })
+    out = pd.DataFrame(rows).sort_values(['Score','Combination'], ascending=[False, True]).head(top_n).reset_index(drop=True)
+    out['Rank'] = out.index + 1
+    return out
 
 def metric_cards(df, features):
     latest = features.iloc[-1]
@@ -121,11 +160,18 @@ if page == 'Dashboard':
 
 elif page == 'Predictions':
     st.markdown("<div class='edge-subtitle'>Individual, pair, triplet, combination, and Over/Under outputs.</div>", unsafe_allow_html=True)
-    show_n = st.slider('Individual numbers', 3, 36, 10)
-    show_pairs = st.slider('Pairs', 5, 50, 10)
-    show_triplets = st.slider('Triplets', 5, 50, 10)
-    show_combos = st.slider('Combinations', 5, 50, 10)
-    ns, combos, pairs, trips, ou = cached_predictions(str(DATA_PATH), show_combos, show_pairs, show_triplets)
+    control_cols = st.columns(4)
+    with control_cols[0]:
+        show_n = st.slider('Individual numbers', 3, 36, 10)
+    with control_cols[1]:
+        show_pairs = st.slider('Pairs', 5, 50, 10)
+    with control_cols[2]:
+        show_triplets = st.slider('Triplets', 5, 50, 10)
+    with control_cols[3]:
+        show_combos = st.slider('Combinations', 5, 50, 10)
+
+    with st.spinner('Loading prediction outputs...'):
+        ns, combos, pairs, trips, ou = cached_predictions(str(DATA_PATH), show_combos, show_pairs, show_triplets)
     combo_top = combos.iloc[0]; top3 = ns.head(3); confidence_width = min(100, max(0, ou['confidence']))
     c1,c2,c3,c4 = st.columns([1.15,1,1.15,1.05])
     with c1: card('Over / Under 92.5', f"<div class='edge-big-green'>{ou['prediction']}</div><div>Confidence: <b>{ou['confidence']}%</b></div><div class='edge-progress'><div style='width:{confidence_width}%;'></div></div><div style='color:#9fb0c7;font-size:.85rem;'>Over {ou['prob_over']}% · Under {ou['prob_under']}%</div>", f"10-draw avg sum: {ou['recent_avg_sum_10']}")
@@ -136,7 +182,9 @@ elif page == 'Predictions':
     with tab1: st.dataframe(ns.head(show_n), use_container_width=True, hide_index=True)
     with tab2: st.dataframe(pairs, use_container_width=True, hide_index=True)
     with tab3: st.dataframe(trips, use_container_width=True, hide_index=True)
-    with tab4: st.dataframe(combos, use_container_width=True, hide_index=True)
+    with tab4:
+        st.caption('Fast candidate-based ranking from the top individual numbers. Full 376,992-combination audit is intentionally not run on page load.')
+        st.dataframe(combos, use_container_width=True, hide_index=True)
 
 elif page == 'Latest Draw Review':
     st.markdown("<div class='edge-subtitle'>How the latest result looked to the model before the draw happened.</div>", unsafe_allow_html=True)
