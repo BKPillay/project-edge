@@ -1,7 +1,10 @@
 {
-  "draws_tested": 5,
-  "actual_over_92_5_rate": 40.0,
-  "latest_sum": 122,
+  "draws_loaded": 2668,
+  "actual_over_92_5_rate": 48.76,
+  "latest_sum": 103,
   "latest_over_under": "Over 92.5",
-  "note": "Heavy back-testing belongs in model scripts, not Streamlit page rendering."
+  "avg_sum": 91.88,
+  "median_sum": 92.0,
+  "most_common_structure": "2O/3E \u00b7 2L/3H",
+  "note": "Fast summary mode. Full walk-forward back-testing should run as a separate optional audit, not during every model update."
 }

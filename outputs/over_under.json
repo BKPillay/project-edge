@@ -1,11 +1,12 @@
 {
   "prediction": "Under 92.5",
-  "confidence": 58.5,
-  "prob_over": 41.5,
-  "prob_under": 58.5,
-  "recent_avg_sum_10": 87.6,
-  "all_time_over_rate": 40.0,
-  "recent_20_over_rate": 40.0,
-  "recent_50_over_rate": 40.0,
-  "recent_100_over_rate": 40.0
+  "confidence": 58.1,
+  "prob_over": 41.9,
+  "prob_under": 58.1,
+  "recent_avg_sum_10": 84.4,
+  "all_time_over_rate": 48.76,
+  "recent_20_over_rate": 25.0,
+  "recent_50_over_rate": 42.0,
+  "recent_100_over_rate": 48.0,
+  "recent_250_over_rate": 48.0
 }

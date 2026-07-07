@@ -1,6 +1,6 @@
-draw_date,ball,pre_draw_rank,model_score,last_20,last_50,gap,actual_sum,actual_ou,ou_prediction_before_draw,ou_correct,insight
-2026-07-04,16,8,50.0,1,1,2,122,Over 92.5,Under 92.5,False,Strong pre-draw pick
-2026-07-04,17,24,10.0,0,0,4,122,Over 92.5,Under 92.5,False,Model underweighted this ball
-2026-07-04,25,3,92.5,2,2,1,122,Over 92.5,Under 92.5,False,Elite pre-draw pick
-2026-07-04,28,31,10.0,0,0,4,122,Over 92.5,Under 92.5,False,Model underweighted this ball
-2026-07-04,36,10,50.0,1,1,2,122,Over 92.5,Under 92.5,False,Strong pre-draw pick
+draw_number,draw_date,ball,pre_draw_rank,model_score,frequency_score,momentum_score,gap_score,last_20,last_50,current_gap,actual_sum,actual_ou,ou_prediction_before_draw,ou_correct,insight
+2668,2026-07-05,4,4,56.88,69.0,68.61,9.09,4,10,3,103,Over 92.5,Under 92.5,False,Strong pre-draw pick
+2668,2026-07-05,9,5,53.94,72.91,48.24,21.21,3,7,7,103,Over 92.5,Under 92.5,False,Strong pre-draw pick
+2668,2026-07-05,29,35,22.68,11.84,18.41,54.55,1,5,18,103,Over 92.5,Under 92.5,False,Model underweighted this ball
+2668,2026-07-05,30,15,44.09,50.66,55.65,9.09,3,8,3,103,Over 92.5,Under 92.5,False,Mid-ranked pick
+2668,2026-07-05,31,20,40.79,42.16,53.69,15.15,3,9,5,103,Over 92.5,Under 92.5,False,Mid-ranked pick
