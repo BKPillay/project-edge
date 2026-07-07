@@ -1,5 +1,1 @@
-Copy patch_v2_7_combination_ensemble.py into your project root.
-Run:
-  python patch_v2_7_combination_ensemble.py
-  python scripts\run_model_update.py
-Then commit/push app.py, models/combination_model.py, scripts/run_model_update.py, and outputs/.
+1. Copy run_research_validation.py into scripts/\n2. Copy patch_research_page.py into project root and run: python patch_research_page.py\n3. Run: python scripts\\run_research_validation.py\n4. Commit/push app.py, scripts/run_research_validation.py, outputs/research/\n

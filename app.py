@@ -300,7 +300,7 @@ with st.sidebar:
 
     page = st.radio(
         "Navigation",
-        ["Dashboard", "Predictions", "Latest Draw Review", "Analytics", "Back-testing", "History / Updates"],
+        ["Dashboard", "Predictions", "Latest Draw Review", "Analytics", "Back-testing", "Research / Validation", "History / Updates"],
         label_visibility="collapsed",
     )
 
@@ -336,6 +336,11 @@ ou = read_json("over_under.json")
 summary = read_json("run_summary.json")
 backtest = read_json("backtest_summary.json")
 structural = read_json("structural_summary.json")
+
+research_repeat = read_csv("research/number_repeat_rate_study.csv")
+research_cooling = read_csv("research/recency_cooling_backtest.csv")
+research_summary = read_json("research/research_summary.json")
+
 
 if page == "Dashboard":
     st.markdown("<div class='edge-title'>Dashboard</div>", unsafe_allow_html=True)
@@ -555,6 +560,24 @@ elif page == "Back-testing":
     st.markdown("<div class='edge-title'>Back-testing</div>", unsafe_allow_html=True)
     st.markdown("<div class='edge-subtitle'>Sampled walk-forward validation generated offline.</div>", unsafe_allow_html=True)
     st.json(backtest)
+
+
+
+elif page == "Research / Validation":
+    st.markdown("<div class='edge-title'>Research / Validation</div>", unsafe_allow_html=True)
+    st.markdown("<div class='edge-subtitle'>Evidence reports generated offline. This page does not run heavy analysis live.</div>", unsafe_allow_html=True)
+
+    if not len(research_cooling) and not len(research_repeat):
+        st.warning("No research outputs found yet. Run: python scripts\run_research_validation.py")
+    else:
+        st.subheader("Recency Cooling Back-test")
+        st.dataframe(research_cooling, use_container_width=True, hide_index=True)
+
+        st.subheader("Number Repeat Rate Study")
+        st.dataframe(research_repeat, use_container_width=True, hide_index=True)
+
+        st.subheader("Research Summary")
+        st.json(research_summary)
 
 
 elif page == "History / Updates":
