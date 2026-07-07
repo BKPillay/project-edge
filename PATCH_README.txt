@@ -1,4 +1,5 @@
-Copy patch_v2_4_recency_cooling.py into your project root.
-Run: python patch_v2_4_recency_cooling.py
-Then run: python scripts\run_model_update.py
-Commit and push: models/number_model.py, app.py, and outputs/.
+Copy patch_v2_5_learned_recency.py into your project root.
+Run:
+  python patch_v2_5_learned_recency.py
+  python scripts\run_model_update.py
+Then commit/push app.py, models/number_model.py, and outputs/.

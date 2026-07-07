@@ -362,6 +362,8 @@ if page == "Dashboard":
 
 elif page == "Predictions":
     st.markdown("<div class='edge-title'>Predictions</div>", unsafe_allow_html=True)
+    if "repeat_penalty" in numbers.columns:
+        st.info("v2.5 uses learned recency cooling: final_score is raw strength, repeat_penalty is based on historical repeat behaviour, and selection_rank drives today’s recommendations.")
     st.markdown("<div class='edge-subtitle'>Full-history rankings. Sliders only slice saved outputs.</div>", unsafe_allow_html=True)
     if "selection_score" in numbers.columns:
         st.info("v2.4 uses selection_rank for recommendations. final_score remains the raw model score; selection_score applies a cooling penalty to numbers drawn in the last 3 draws.")
