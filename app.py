@@ -367,7 +367,7 @@ if page == "Dashboard":
 elif page == "Predictions":
     st.markdown("<div class='edge-title'>Predictions</div>", unsafe_allow_html=True)
     if "repeat_penalty" in numbers.columns:
-        st.info("v2.6 uses selection_rank across numbers, pairs, and triplets. Raw scores remain visible, while recent-hit penalties cool repeated selections.")
+        st.info("v2.7 uses selection logic across numbers, pairs, triplets, and combinations. Combination scores now use cooled selection scores from the lower-level models.")
     st.markdown("<div class='edge-subtitle'>Full-history rankings. Sliders only slice saved outputs.</div>", unsafe_allow_html=True)
     if "selection_score" in numbers.columns:
         st.info("v2.4 uses selection_rank for recommendations. final_score remains the raw model score; selection_score applies a cooling penalty to numbers drawn in the last 3 draws.")

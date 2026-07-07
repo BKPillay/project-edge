@@ -33,7 +33,7 @@ def main():
     numbers = score_numbers(df)
     pairs = score_pairs(df, 100)
     triplets = score_triplets(df, 100)
-    combos = score_combinations(numbers, 100)
+    combos = score_combinations(numbers, pairs, triplets, 100)
     ou = predict_over_under(df)
     latest_ball_review, latest_pair_review, latest_triplet_review = build_latest_draw_review(df)
     backtest = build_backtest_summary(df)
