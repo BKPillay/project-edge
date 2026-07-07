@@ -1,5 +1,7 @@
 from pathlib import Path
 import json
+import sys
+import subprocess
 
 import pandas as pd
 import streamlit as st
@@ -28,6 +30,143 @@ div[data-testid="stToolbar"], div[data-testid="stDecoration"], div[data-testid="
 .edge-pill.blue { border-color:rgba(63,140,255,.85); background:rgba(63,140,255,.09); }
 </style>
 """, unsafe_allow_html=True)
+
+# EDGE_AI_V2_3_DARK_THEME_FIX
+st.markdown("""
+<style>
+header[data-testid="stHeader"] {
+    background: rgba(0,0,0,0) !important;
+    height: 0rem !important;
+}
+div[data-testid="stToolbar"],
+div[data-testid="stDecoration"],
+div[data-testid="stStatusWidget"] {
+    visibility: hidden !important;
+    height: 0rem !important;
+    display: none !important;
+}
+#MainMenu, footer {
+    visibility: hidden !important;
+}
+.stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+.block-container {
+    background: linear-gradient(180deg, #07111f 0%, #050b14 100%) !important;
+    color: #eef4ff !important;
+}
+[data-testid="stSidebar"] {
+    background: #07111f !important;
+    border-right: 1px solid rgba(120,145,180,.22) !important;
+}
+[data-testid="stSidebar"] * {
+    color: #eef4ff !important;
+}
+[data-testid="stForm"] {
+    background: rgba(14,31,56,.72) !important;
+    border: 1px solid rgba(120,145,180,.22) !important;
+    border-radius: 14px !important;
+    padding: 1rem !important;
+}
+[data-testid="stForm"] * {
+    color: #eef4ff !important;
+}
+.stTextInput input,
+.stNumberInput input,
+.stDateInput input,
+.stSelectbox div,
+.stMultiSelect div,
+div[data-baseweb="input"],
+div[data-baseweb="select"],
+div[data-baseweb="datepicker"] input {
+    background-color: #0b182b !important;
+    color: #eef4ff !important;
+    border-color: rgba(120,145,180,.35) !important;
+}
+div[data-baseweb="popover"],
+div[data-baseweb="menu"],
+div[data-baseweb="calendar"] {
+    background-color: #0b182b !important;
+    color: #eef4ff !important;
+    border: 1px solid rgba(120,145,180,.35) !important;
+}
+div[data-baseweb="calendar"] * {
+    background-color: #0b182b !important;
+    color: #eef4ff !important;
+}
+.stButton > button,
+.stDownloadButton > button,
+button[kind="primary"],
+button[kind="secondary"] {
+    background: rgba(14,31,56,.92) !important;
+    color: #eef4ff !important;
+    border: 1px solid rgba(120,145,180,.35) !important;
+    border-radius: 10px !important;
+}
+.stButton > button:hover,
+.stDownloadButton > button:hover,
+button[kind="primary"]:hover,
+button[kind="secondary"]:hover {
+    border-color: #9b5cff !important;
+    color: #ffffff !important;
+}
+button[data-baseweb="tab"] {
+    background: transparent !important;
+    color: #9fb0c7 !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #eef4ff !important;
+    border-bottom-color: #9b5cff !important;
+}
+[data-testid="stDataFrame"] {
+    background: #0b182b !important;
+    border: 1px solid rgba(120,145,180,.22) !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+[data-testid="stDataFrame"] * {
+    color: #eef4ff !important;
+}
+[data-testid="stDataFrame"] div {
+    background-color: transparent !important;
+}
+[data-testid="stDataFrame"] [role="grid"] {
+    background-color: #0b182b !important;
+}
+[data-testid="stDataFrame"] [role="columnheader"] {
+    background-color: #132947 !important;
+    color: #c7d5ea !important;
+    border-color: rgba(120,145,180,.22) !important;
+}
+[data-testid="stDataFrame"] [role="gridcell"] {
+    background-color: #0b182b !important;
+    color: #eef4ff !important;
+    border-color: rgba(120,145,180,.12) !important;
+}
+[data-testid="stDataFrame"] [role="row"]:nth-child(even) [role="gridcell"] {
+    background-color: #0e2038 !important;
+}
+table {
+    background: #0b182b !important;
+    color: #eef4ff !important;
+}
+thead tr th {
+    background: #132947 !important;
+    color: #c7d5ea !important;
+}
+tbody tr td {
+    background: #0b182b !important;
+    color: #eef4ff !important;
+}
+[data-testid="stAlert"] {
+    background: rgba(14,31,56,.92) !important;
+    color: #eef4ff !important;
+    border: 1px solid rgba(120,145,180,.22) !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 
 
 def read_csv(name):
@@ -61,6 +200,85 @@ def card(title, value, footer=""):
 def pills(numbers, colour=""):
     cls = "edge-pill blue" if colour == "blue" else "edge-pill"
     return "".join([f"<span class='{cls}'>{int(n):02d}</span>" for n in numbers])
+
+
+# EDGE_AI_V2_3_SAVE_DRAW_HELPERS
+def load_history_for_save():
+    if not DATA_PATH.exists():
+        return pd.DataFrame(columns=["draw_number", "draw_date", "n1", "n2", "n3", "n4", "n5"])
+    df = pd.read_csv(DATA_PATH)
+    if "draw_number" not in df.columns:
+        df.insert(0, "draw_number", range(1, len(df) + 1))
+    df["draw_number"] = pd.to_numeric(df["draw_number"], errors="coerce").astype("Int64")
+    df["draw_date"] = pd.to_datetime(df["draw_date"], errors="coerce")
+    for col in ["n1", "n2", "n3", "n4", "n5"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
+    return df
+
+
+def save_new_draw_to_history(draw_date, numbers_to_save):
+    df_hist = load_history_for_save()
+    draw_date_ts = pd.to_datetime(draw_date)
+    nums = sorted([int(n) for n in numbers_to_save])
+
+    if len(set(nums)) != 5:
+        return False, "Enter 5 unique numbers from 1 to 36."
+
+    if any(n < 1 or n > 36 for n in nums):
+        return False, "All numbers must be between 1 and 36."
+
+    if len(df_hist):
+        existing_date = df_hist["draw_date"].dt.date.eq(draw_date_ts.date()).any()
+        if existing_date:
+            return False, f"Draw date {draw_date_ts.date()} already exists in history."
+
+        combo_cols = ["n1", "n2", "n3", "n4", "n5"]
+        sorted_existing = df_hist[combo_cols].apply(lambda r: "-".join(map(str, sorted([int(x) for x in r]))), axis=1)
+        combo_key = "-".join(map(str, nums))
+        if combo_key in set(sorted_existing):
+            return False, f"This exact combination already exists in history: {combo_key}"
+
+        next_draw_number = int(df_hist["draw_number"].max()) + 1
+    else:
+        next_draw_number = 1
+
+    new_row = pd.DataFrame([{
+        "draw_number": next_draw_number,
+        "draw_date": draw_date_ts.strftime("%Y-%m-%d"),
+        "n1": nums[0],
+        "n2": nums[1],
+        "n3": nums[2],
+        "n4": nums[3],
+        "n5": nums[4],
+    }])
+
+    out = pd.concat([df_hist, new_row], ignore_index=True)
+    out["draw_date"] = pd.to_datetime(out["draw_date"]).dt.strftime("%Y-%m-%d")
+    out = out.sort_values(["draw_number", "draw_date"]).reset_index(drop=True)
+    out.to_csv(DATA_PATH, index=False)
+
+    return True, f"Saved draw #{next_draw_number}: {draw_date_ts.date()} — {'-'.join(map(str, nums))}"
+
+
+def run_model_update_after_save():
+    script_path = Path("scripts/run_model_update.py")
+    if not script_path.exists():
+        return False, "Saved the draw, but scripts/run_model_update.py was not found. Run the model update manually."
+
+    try:
+        result = subprocess.run(
+            [sys.executable, str(script_path)],
+            capture_output=True,
+            text=True,
+            timeout=180,
+        )
+    except Exception as exc:
+        return False, f"Saved the draw, but model update failed to start: {exc}"
+
+    if result.returncode != 0:
+        return False, "Saved the draw, but model update failed. Check terminal logs."
+
+    return True, "Model outputs regenerated successfully."
 
 
 def outputs_ready():
@@ -177,13 +395,14 @@ elif page == "Predictions":
 
 
 
+
 elif page == "Latest Draw Review":
     st.markdown("<div class='edge-title'>Latest Draw Review</div>", unsafe_allow_html=True)
-    st.markdown("<div class='edge-subtitle'>Preview a new draw instantly, then compare the latest saved draw against the pre-draw model snapshot.</div>", unsafe_allow_html=True)
+    st.markdown("<div class='edge-subtitle'>Preview, save, and then review the latest draw without changing the project structure.</div>", unsafe_allow_html=True)
 
-    st.subheader("Preview New Draw")
+    st.subheader("Preview / Save New Draw")
 
-    with st.form("preview_new_draw_form"):
+    with st.form("preview_save_new_draw_form"):
         preview_date = st.date_input("Draw date")
         cols = st.columns(5)
         preview_nums = [
@@ -193,67 +412,92 @@ elif page == "Latest Draw Review":
             cols[3].number_input("N4", min_value=1, max_value=36, value=4, step=1),
             cols[4].number_input("N5", min_value=1, max_value=36, value=5, step=1),
         ]
-        preview_clicked = st.form_submit_button("Preview Ball Review")
+
+        action_col1, action_col2 = st.columns(2)
+        preview_clicked = action_col1.form_submit_button("Preview Ball Review")
+        save_clicked = action_col2.form_submit_button("Save Draw + Update Model")
 
     preview_nums = sorted([int(n) for n in preview_nums])
 
-    if preview_clicked:
+    def render_preview(nums, draw_date):
+        score_map = numbers.set_index("number").to_dict(orient="index")
+        preview_rows = []
+
+        for n in nums:
+            info = score_map.get(n, {})
+            rank = info.get("rank")
+            final_score = info.get("final_score")
+            freq = info.get("frequency_score")
+            momentum = info.get("momentum_score")
+            gap_score = info.get("gap_score")
+            current_gap = info.get("current_gap")
+            bucket = info.get("bucket")
+
+            if rank is None:
+                insight = "Not found in model output"
+            elif rank <= 3:
+                insight = "Elite current model pick"
+            elif rank <= 10:
+                insight = "Strong current model pick"
+            elif rank <= 20:
+                insight = "Mid-ranked current model pick"
+            else:
+                insight = "Model currently underweights this ball"
+
+            preview_rows.append({
+                "ball": n,
+                "current_rank": rank,
+                "final_score": final_score,
+                "frequency_score": freq,
+                "momentum_score": momentum,
+                "gap_score": gap_score,
+                "current_gap": current_gap,
+                "bucket": bucket,
+                "insight": insight,
+            })
+
+        preview_sum = sum(nums)
+        preview_ou = "Over 92.5" if preview_sum > 92.5 else "Under 92.5"
+        top3_hits = len(set(nums) & set(numbers.head(3)["number"].astype(int).tolist()))
+        top10_hits = len(set(nums) & set(numbers.head(10)["number"].astype(int).tolist()))
+
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            card("Preview Date", str(draw_date))
+        with c2:
+            st.markdown("<div class='edge-card'><div class='edge-label'>Entered Numbers</div>" + pills(nums) + f"<div style='color:#9fb0c7;font-size:.82rem;margin-top:.5rem;'>Sum: {preview_sum}</div></div>", unsafe_allow_html=True)
+        with c3:
+            card("O/U Result", preview_ou, f"Current model says: {ou.get('prediction', 'n/a')}")
+        with c4:
+            card("Model Capture", f"{top3_hits}/3", f"Top 10 hits: {top10_hits}/5")
+
+        st.subheader("Preview Ball Review")
+        st.dataframe(pd.DataFrame(preview_rows), use_container_width=True, hide_index=True)
+
+    if preview_clicked or save_clicked:
         if len(set(preview_nums)) != 5:
             st.error("Enter 5 unique numbers from 1 to 36.")
         else:
-            score_map = numbers.set_index("number").to_dict(orient="index")
-            preview_rows = []
+            render_preview(preview_nums, preview_date)
 
-            for n in preview_nums:
-                info = score_map.get(n, {})
-                rank = info.get("rank")
-                final_score = info.get("final_score")
-                freq = info.get("frequency_score")
-                momentum = info.get("momentum_score")
-                gap_score = info.get("gap_score")
-                current_gap = info.get("current_gap")
-                bucket = info.get("bucket")
+    if save_clicked:
+        if len(set(preview_nums)) != 5:
+            st.stop()
 
-                if rank is None:
-                    insight = "Not found in model output"
-                elif rank <= 3:
-                    insight = "Elite current model pick"
-                elif rank <= 10:
-                    insight = "Strong current model pick"
-                elif rank <= 20:
-                    insight = "Mid-ranked current model pick"
-                else:
-                    insight = "Model currently underweights this ball"
+        ok, message = save_new_draw_to_history(preview_date, preview_nums)
+        if not ok:
+            st.error(message)
+        else:
+            st.success(message)
 
-                preview_rows.append({
-                    "ball": n,
-                    "current_rank": rank,
-                    "final_score": final_score,
-                    "frequency_score": freq,
-                    "momentum_score": momentum,
-                    "gap_score": gap_score,
-                    "current_gap": current_gap,
-                    "bucket": bucket,
-                    "insight": insight,
-                })
+            with st.spinner("Updating model outputs..."):
+                update_ok, update_message = run_model_update_after_save()
 
-            preview_sum = sum(preview_nums)
-            preview_ou = "Over 92.5" if preview_sum > 92.5 else "Under 92.5"
-            top3_hits = len(set(preview_nums) & set(numbers.head(3)["number"].astype(int).tolist()))
-            top10_hits = len(set(preview_nums) & set(numbers.head(10)["number"].astype(int).tolist()))
-
-            c1, c2, c3, c4 = st.columns(4)
-            with c1:
-                card("Preview Date", str(preview_date))
-            with c2:
-                st.markdown("<div class='edge-card'><div class='edge-label'>Entered Numbers</div>" + pills(preview_nums) + f"<div style='color:#9fb0c7;font-size:.82rem;margin-top:.5rem;'>Sum: {preview_sum}</div></div>", unsafe_allow_html=True)
-            with c3:
-                card("O/U Result", preview_ou, f"Current model says: {ou.get('prediction', 'n/a')}")
-            with c4:
-                card("Model Capture", f"{top3_hits}/3", f"Top 10 hits: {top10_hits}/5")
-
-            st.subheader("Preview Ball Review")
-            st.dataframe(pd.DataFrame(preview_rows), use_container_width=True, hide_index=True)
+            if update_ok:
+                st.success(update_message)
+                st.info("Commit and push the updated data/outputs/app.py files so Streamlit Cloud persists the changes.")
+            else:
+                st.warning(update_message)
 
     st.divider()
 
