@@ -1,1 +1,1 @@
-Copy patch_empty_csv_fix.py into your project root, run `python patch_empty_csv_fix.py`, then commit and push app.py.
+Copy patch_latest_draw_preview.py into your project root, run: python patch_latest_draw_preview.py, then commit and push app.py.
