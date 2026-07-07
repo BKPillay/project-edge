@@ -1,12 +1,22 @@
-# EDGE AI v8 — Cached Back-tests + Latest Draw Review
 
-## New in v8
+# EDGE AI v1.0 Stable
 
-- Cached prediction outputs so page clicks are faster
-- Cached/sampled back-testing to avoid Streamlit hanging
-- New Latest Draw Review page
-- Ball-by-ball pre-draw rank and score review
-- Pair and triplet review for the latest draw
-- Clear distinction between model score and true probability
+EDGE AI is now split into a fast Streamlit dashboard and a separate model engine.
 
-Deploy by replacing your repo files, committing, and pushing to Streamlit.
+## Run the model update
+
+From project root:
+
+```powershell
+python scripts\run_model_update.py
+```
+
+This version adds the project root to `sys.path`, so it also works from the scripts folder.
+
+## Then commit and push
+
+```powershell
+git add data outputs models scripts app.py .github README.md
+git commit -m "EDGE AI v1 stable"
+git push
+```

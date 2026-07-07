@@ -1,0 +1,6 @@
+draw_date,ball,pre_draw_rank,model_score,last_20,last_50,gap,actual_sum,actual_ou,ou_prediction_before_draw,ou_correct,insight
+2026-07-04,16,8,50.0,1,1,2,122,Over 92.5,Under 92.5,False,Strong pre-draw pick
+2026-07-04,17,24,10.0,0,0,4,122,Over 92.5,Under 92.5,False,Model underweighted this ball
+2026-07-04,25,3,92.5,2,2,1,122,Over 92.5,Under 92.5,False,Elite pre-draw pick
+2026-07-04,28,31,10.0,0,0,4,122,Over 92.5,Under 92.5,False,Model underweighted this ball
+2026-07-04,36,10,50.0,1,1,2,122,Over 92.5,Under 92.5,False,Strong pre-draw pick

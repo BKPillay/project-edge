@@ -1,0 +1,21 @@
+{
+  "draws_loaded": 5,
+  "latest_draw_date": "2026-07-04",
+  "latest_numbers": [
+    16,
+    17,
+    25,
+    28,
+    36
+  ],
+  "generated_files": [
+    "features.csv",
+    "number_predictions.csv",
+    "pair_predictions.csv",
+    "triplet_predictions.csv",
+    "combination_predictions.csv",
+    "over_under.json",
+    "latest_draw_ball_review.csv",
+    "backtest_summary.json"
+  ]
+}

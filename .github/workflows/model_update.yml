@@ -1,0 +1,30 @@
+
+name: EDGE AI model update
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "data/daily_lotto_history.csv"
+      - "scripts/run_model_update.py"
+      - "models/**"
+permissions:
+  contents: write
+jobs:
+  update-model:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install pandas numpy
+      - name: Run model update
+        run: python scripts/run_model_update.py
+      - name: Commit generated outputs
+        run: |
+          git config user.name "edge-ai-bot"
+          git config user.email "edge-ai-bot@users.noreply.github.com"
+          git add outputs/
+          git diff --cached --quiet || git commit -m "Update EDGE AI outputs"
+          git push

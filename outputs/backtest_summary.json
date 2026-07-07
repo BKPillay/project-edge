@@ -1,0 +1,7 @@
+{
+  "draws_tested": 5,
+  "actual_over_92_5_rate": 40.0,
+  "latest_sum": 122,
+  "latest_over_under": "Over 92.5",
+  "note": "Heavy back-testing belongs in model scripts, not Streamlit page rendering."
+}
