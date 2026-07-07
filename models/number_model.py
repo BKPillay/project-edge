@@ -122,6 +122,37 @@ def score_numbers(df: pd.DataFrame) -> pd.DataFrame:
 
     out = pd.DataFrame(rows).sort_values(["final_score", "number"], ascending=[False, True]).reset_index(drop=True)
     out["rank"] = out.index + 1
+
+    # EDGE AI v2.4: post-hit cooling layer.
+    # final_score remains the raw model score.
+    # selection_score is the next-draw recommendation score.
+    recent_draws = []
+    if len(df) >= 1:
+        recent_draws.append(set(map(int, df.iloc[-1][NUMBER_COLS].tolist())))
+    if len(df) >= 2:
+        recent_draws.append(set(map(int, df.iloc[-2][NUMBER_COLS].tolist())))
+    if len(df) >= 3:
+        recent_draws.append(set(map(int, df.iloc[-3][NUMBER_COLS].tolist())))
+
+    def recency_penalty(number):
+        number = int(number)
+        if len(recent_draws) >= 1 and number in recent_draws[0]:
+            return 25.0
+        if len(recent_draws) >= 2 and number in recent_draws[1]:
+            return 15.0
+        if len(recent_draws) >= 3 and number in recent_draws[2]:
+            return 8.0
+        return 0.0
+
+    out["recency_penalty"] = out["number"].apply(recency_penalty)
+    out["selection_score"] = (out["final_score"] * (1 - out["recency_penalty"] / 100)).round(2)
+
+    selection_order = out.sort_values(["selection_score", "number"], ascending=[False, True]).reset_index(drop=True)
+    selection_order["selection_rank"] = selection_order.index + 1
+    out = out.merge(selection_order[["number", "selection_rank"]], on="number", how="left")
+
+    # Keep raw rank visible, but order the output by today's selection rank.
+    out = out.sort_values(["selection_rank", "number"], ascending=[True, True]).reset_index(drop=True)
     return out
 
 

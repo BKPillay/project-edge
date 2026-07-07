@@ -1,2 +1,4 @@
-Copy patch_v2_3_app_only.py into your project root, run `python patch_v2_3_app_only.py`, then commit and push app.py.
-This only changes app.py. It adds Save Draw + Update Model to Latest Draw Review and improves dark UI overrides.
+Copy patch_v2_4_recency_cooling.py into your project root.
+Run: python patch_v2_4_recency_cooling.py
+Then run: python scripts\run_model_update.py
+Commit and push: models/number_model.py, app.py, and outputs/.

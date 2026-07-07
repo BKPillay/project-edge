@@ -320,6 +320,8 @@ if not outputs_ready():
 
 features = read_csv("features.csv")
 numbers = read_csv("number_predictions.csv")
+if "selection_rank" in numbers.columns:
+    numbers = numbers.sort_values(["selection_rank", "number"]).reset_index(drop=True)
 pairs = read_csv("pair_predictions.csv")
 triplets = read_csv("triplet_predictions.csv")
 combos = read_csv("combination_predictions.csv")
@@ -361,12 +363,14 @@ if page == "Dashboard":
 elif page == "Predictions":
     st.markdown("<div class='edge-title'>Predictions</div>", unsafe_allow_html=True)
     st.markdown("<div class='edge-subtitle'>Full-history rankings. Sliders only slice saved outputs.</div>", unsafe_allow_html=True)
+    if "selection_score" in numbers.columns:
+        st.info("v2.4 uses selection_rank for recommendations. final_score remains the raw model score; selection_score applies a cooling penalty to numbers drawn in the last 3 draws.")
 
     c1, c2, c3 = st.columns(3)
     with c1:
         card("Over / Under 92.5", ou.get("prediction", "n/a"), f'Confidence: {ou.get("confidence", "n/a")}%')
     with c2:
-        st.markdown("<div class='edge-card'><div class='edge-label'>Top 3 Numbers</div>" + pills(numbers.head(3)["number"].tolist()) + f"<div style='color:#9fb0c7;font-size:.82rem;margin-top:.5rem;'>Avg score: {round(numbers.head(3)['final_score'].mean(),2)}</div></div>", unsafe_allow_html=True)
+        st.markdown("<div class='edge-card'><div class='edge-label'>Top 3 Numbers</div>" + pills(numbers.head(3)["number"].tolist()) + f"<div style='color:#9fb0c7;font-size:.82rem;margin-top:.5rem;'>Avg score: {round(numbers.head(3).get('selection_score', numbers.head(3)['final_score']).mean(),2)}</div></div>", unsafe_allow_html=True)
     with c3:
         combo1 = combos.iloc[0]
         st.markdown("<div class='edge-card'><div class='edge-label'>Best Combo</div>" + pills(str(combo1["combination"]).split("-"), "blue") + f"<div style='color:#9fb0c7;font-size:.82rem;margin-top:.5rem;'>Score: {combo1['score']} · Sum: {combo1['sum']}</div></div>", unsafe_allow_html=True)
