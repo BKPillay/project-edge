@@ -19,7 +19,9 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 def main():
     parser = argparse.ArgumentParser(description="Run EDGE AI Strategy Benchmark Suite")
     parser.add_argument("--min-train", type=int, default=300)
-    parser.add_argument("--step", type=int, default=20, help="Use 1 for a full heavier walk-forward audit")
+    parser.add_argument("--step", type=int, default=20, help="Use 1 for a full walk-forward audit")
+    parser.add_argument("--edge-mode", choices=["fast", "exact"], default="fast", help="fast uses optimized prefix caches; exact uses the original heavy dataframe path")
+    parser.add_argument("--progress-every", type=int, default=100, help="Print progress every N test draws; use 0 to disable")
     parser.add_argument("--no-edge-ai", action="store_true", help="Skip EDGE AI strategy for faster baseline-only checks")
     args = parser.parse_args()
 
@@ -29,6 +31,8 @@ def main():
         min_train=args.min_train,
         step=args.step,
         include_edge_ai=not args.no_edge_ai,
+        edge_mode=args.edge_mode,
+        progress_every=args.progress_every or None,
     )
 
     results.to_csv(OUTPUT_DIR / "strategy_benchmark_results.csv", index=False)

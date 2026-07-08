@@ -98,3 +98,22 @@ This now regenerates the normal prediction outputs and the sampled benchmark out
 
 The app now includes a `Strategy Benchmark` page.
 
+
+## v2.9 Benchmark Optimisation Notes
+
+The Strategy Benchmark Suite now has an optimised prefix-cache engine.
+
+Recommended benchmark commands:
+
+```bash
+python scripts/run_strategy_benchmark.py --min-train 100 --step 20
+python scripts/run_strategy_benchmark.py --min-train 100 --step 5
+```
+
+Use full step 1 only for the heaviest audit:
+
+```bash
+python scripts/run_strategy_benchmark.py --min-train 100 --step 1
+```
+
+The Streamlit Strategy Benchmark page currently reads the output CSV files from `outputs/`. Run the script first, then refresh the Streamlit page.

@@ -1,106 +1,69 @@
-# EDGE AI Project State
+# EDGE AI Daily Lotto - Project State
 
-## Current Release
+## Current Version
+v2.9.0
 
-Version: `EDGE_AI_v2.8.0`
+## Current Milestone
+Strategy Benchmark Suite optimisation.
 
-Baseline source: user-uploaded `project-edge.zip`.
+## What Changed
+The Strategy Benchmark Suite was redesigned so benchmark strategies do not repeatedly rebuild historical counters from scratch. The new benchmark engine precomputes prefix caches for:
 
-This release preserves the existing v2 platform and adds the Strategy Benchmark Suite.
+- number counts
+- pair counts
+- triplet counts
+- pair-derived number scores
+- triplet-derived number scores
+- last-seen gaps
+- repeat-after-1/2/3 statistics
 
-## Existing Architecture Preserved
+This makes sampled walk-forward benchmarking practical and makes stronger audits possible.
 
-The uploaded project already contained:
+## Benchmark Commands
 
-- Full-history Daily Lotto dataset
-- Streamlit app
-- Offline output generation flow
-- Number model
-- Pair model
-- Triplet model
-- Combination ensemble model
-- Structural model
-- Over/Under model
-- Latest draw review engine
-- Research validation scripts
-- Recency cooling research outputs
-- Pair/triplet cooling logic
-- Combination ensemble using cooled lower-level selection scores
+Fast sampled benchmark:
 
-## New in v2.8.0
-
-Added Strategy Benchmark Suite:
-
-- `models/strategy_benchmark.py`
-- `scripts/run_strategy_benchmark.py`
-- Streamlit `Strategy Benchmark` page
-- Offline benchmark outputs
-
-## Benchmark Purpose
-
-The benchmark exists to answer one question:
-
-> Is EDGE AI outperforming simple strategies that take almost no intelligence?
-
-If EDGE AI cannot beat these baselines, the model is not earning its complexity.
-
-## Baseline Strategies
-
-- Random
-- Hot Numbers
-- Cold Numbers
-- Overdue
-- Recent Repeat
-- Pair Frequency
-- Triplet Frequency
-- Balanced Hot
-
-## EDGE AI Benchmark Path
-
-EDGE AI is benchmarked through the real ensemble path:
-
-```text
-score_numbers -> score_pairs -> score_triplets -> score_combinations
+```bash
+python scripts/run_strategy_benchmark.py --min-train 100 --step 20
 ```
 
-This prevents a false benchmark where EDGE AI is represented by a simplified proxy.
+Stronger sampled benchmark:
 
-## Validation Method
-
-Sampled walk-forward validation:
-
-```text
-Train on historical draws before target draw
-Predict target draw
-Compare prediction to actual result
-Repeat forward through history
+```bash
+python scripts/run_strategy_benchmark.py --min-train 100 --step 5
 ```
 
-Default benchmark settings:
+Full heavier walk-forward benchmark:
 
-- `min_train = 300`
-- `step = 20`
-- `include_edge_ai = True`
+```bash
+python scripts/run_strategy_benchmark.py --min-train 100 --step 1
+```
 
-Use `--step 1` for a heavier full audit.
+Baseline-only benchmark:
 
-## Current Next Milestones
+```bash
+python scripts/run_strategy_benchmark.py --min-train 100 --step 1 --no-edge-ai
+```
 
-1. Feature Importance Engine
-2. Weight Optimiser
-3. Walk-Forward Validator with configurable model versions
-4. Experiment Registry
+Exact original EDGE path for small parity checks only:
 
-## Project Continuity Rule
+```bash
+python scripts/run_strategy_benchmark.py --min-train 100 --step 20 --edge-mode exact
+```
 
-Future work should be delivered as versioned ZIP releases, not loose code snippets.
+## Current Finding From Local Test
+A `--step 5` benchmark completed successfully in the packaging environment and produced 514 tests per strategy.
 
-Each release should include:
+The sampled result showed EDGE AI was competitive but not dominant. This is exactly why the Feature Importance Engine is still required next.
 
-- Complete source files
-- Updated outputs where relevant
-- README updates
-- CHANGELOG updates
-- PROJECT_STATE updates
-- Version number
+## Next Recommended Milestone
+Feature Importance Engine.
 
+Purpose:
+- Disable or isolate features one at a time.
+- Rerun benchmark.
+- Measure which components genuinely improve results.
+- Remove or reduce features that are dead weight.
+
+## Important Project Principle
+Do not treat EDGE AI as successful unless it beats simple baselines consistently over meaningful walk-forward tests.
