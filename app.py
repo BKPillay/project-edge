@@ -300,7 +300,7 @@ with st.sidebar:
 
     page = st.radio(
         "Navigation",
-        ["Dashboard", "Predictions", "Latest Draw Review", "Analytics", "Back-testing", "Research / Validation", "History / Updates"],
+        ["Dashboard", "Predictions", "Latest Draw Review", "Analytics", "Back-testing", "Strategy Benchmark", "Research / Validation", "History / Updates"],
         label_visibility="collapsed",
     )
 
@@ -336,6 +336,10 @@ ou = read_json("over_under.json")
 summary = read_json("run_summary.json")
 backtest = read_json("backtest_summary.json")
 structural = read_json("structural_summary.json")
+
+strategy_benchmark = read_csv("strategy_benchmark_summary.csv")
+strategy_benchmark_results = read_csv("strategy_benchmark_results.csv")
+strategy_benchmark_meta = read_json("strategy_benchmark_summary.json")
 
 research_repeat = read_csv("research/number_repeat_rate_study.csv")
 research_cooling = read_csv("research/recency_cooling_backtest.csv")
@@ -561,6 +565,47 @@ elif page == "Back-testing":
     st.markdown("<div class='edge-subtitle'>Sampled walk-forward validation generated offline.</div>", unsafe_allow_html=True)
     st.json(backtest)
 
+
+
+elif page == "Strategy Benchmark":
+    st.markdown("<div class='edge-title'>Strategy Benchmark Suite</div>", unsafe_allow_html=True)
+    st.markdown("<div class='edge-subtitle'>EDGE AI compared against simple baseline strategies using sampled walk-forward validation.</div>", unsafe_allow_html=True)
+
+    if not len(strategy_benchmark):
+        st.warning("No strategy benchmark output found yet. Run: python scripts\run_strategy_benchmark.py")
+    else:
+        st.info("This page is the reality check. If EDGE AI cannot beat simple baselines, the model is not earning its complexity.")
+
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            card("Tests per Strategy", strategy_benchmark_meta.get("tests_per_strategy", "n/a"))
+        with c2:
+            card("Min Training Draws", strategy_benchmark_meta.get("min_train", "n/a"))
+        with c3:
+            leader = strategy_benchmark_meta.get("leader", {})
+            card("Current Leader", leader.get("strategy", "n/a"), f"Avg matches: {leader.get('avg_matches', 'n/a')}")
+
+        st.subheader("Benchmark Summary")
+        st.dataframe(strategy_benchmark, use_container_width=True, hide_index=True)
+
+        if len(strategy_benchmark_results):
+            st.subheader("Detailed Walk-Forward Results")
+            st.dataframe(strategy_benchmark_results.tail(300), use_container_width=True, hide_index=True)
+
+            st.download_button(
+                "Download Benchmark Summary",
+                data=strategy_benchmark.to_csv(index=False),
+                file_name="strategy_benchmark_summary.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
+            st.download_button(
+                "Download Detailed Benchmark Results",
+                data=strategy_benchmark_results.to_csv(index=False),
+                file_name="strategy_benchmark_results.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
 
 
 elif page == "Research / Validation":

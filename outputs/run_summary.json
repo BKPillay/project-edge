@@ -20,6 +20,9 @@
     "latest_draw_triplet_review.csv",
     "over_under.json",
     "backtest_summary.json",
-    "structural_summary.json"
+    "structural_summary.json",
+    "strategy_benchmark_results.csv",
+    "strategy_benchmark_summary.csv",
+    "strategy_benchmark_summary.json"
   ]
 }

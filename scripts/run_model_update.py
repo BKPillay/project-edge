@@ -16,6 +16,7 @@ from models.over_under_model import predict_over_under
 from models.pair_model import score_pairs
 from models.structural_model import structural_summary
 from models.triplet_model import score_triplets
+from models.strategy_benchmark import run_strategy_benchmark
 
 DATA_PATH = PROJECT_ROOT / "data" / "daily_lotto_history.csv"
 OUTPUT_DIR = PROJECT_ROOT / "outputs"
@@ -38,6 +39,7 @@ def main():
     latest_ball_review, latest_pair_review, latest_triplet_review = build_latest_draw_review(df)
     backtest = build_backtest_summary(df)
     structural = structural_summary(df)
+    benchmark_results, benchmark_summary, benchmark_meta = run_strategy_benchmark(df, min_train=max(300, len(df) - 300), step=20, include_edge_ai=True)
 
     features.to_csv(OUTPUT_DIR / "features.csv", index=False)
     numbers.to_csv(OUTPUT_DIR / "number_predictions.csv", index=False)
@@ -51,6 +53,9 @@ def main():
     write_json(OUTPUT_DIR / "over_under.json", ou)
     write_json(OUTPUT_DIR / "backtest_summary.json", backtest)
     write_json(OUTPUT_DIR / "structural_summary.json", structural)
+    benchmark_results.to_csv(OUTPUT_DIR / "strategy_benchmark_results.csv", index=False)
+    benchmark_summary.to_csv(OUTPUT_DIR / "strategy_benchmark_summary.csv", index=False)
+    write_json(OUTPUT_DIR / "strategy_benchmark_summary.json", benchmark_meta)
 
     summary = {
         "draws_loaded": int(len(df)),
@@ -69,6 +74,9 @@ def main():
             "over_under.json",
             "backtest_summary.json",
             "structural_summary.json",
+            "strategy_benchmark_results.csv",
+            "strategy_benchmark_summary.csv",
+            "strategy_benchmark_summary.json",
         ],
     }
     write_json(OUTPUT_DIR / "run_summary.json", summary)

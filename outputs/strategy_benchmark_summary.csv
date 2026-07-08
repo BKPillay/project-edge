@@ -1,0 +1,10 @@
+rank,strategy,tests,avg_matches,max_matches,hit_2_rate,hit_3_rate,hit_4_rate,hit_5_rate,total_2_plus,total_3_plus,total_4_plus,jackpot_hits
+1,Hot Numbers,15,1.0,2,0.2,0.0,0.0,0.0,3,0,0,0
+2,Pair Frequency,15,1.0,2,0.2,0.0,0.0,0.0,3,0,0,0
+3,Triplet Frequency,15,1.0,2,0.2,0.0,0.0,0.0,3,0,0,0
+4,Balanced Hot,15,0.8667,2,0.2,0.0,0.0,0.0,3,0,0,0
+5,Random,15,0.8,2,0.1333,0.0,0.0,0.0,2,0,0,0
+6,EDGE AI,15,0.7333,2,0.2,0.0,0.0,0.0,3,0,0,0
+7,Overdue,15,0.6667,2,0.1333,0.0,0.0,0.0,2,0,0,0
+8,Recent Repeat,15,0.5333,2,0.1333,0.0,0.0,0.0,2,0,0,0
+9,Cold Numbers,15,0.5333,2,0.0667,0.0,0.0,0.0,1,0,0,0

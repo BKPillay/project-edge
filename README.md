@@ -36,3 +36,65 @@ git push
 ## Note
 
 Full walk-forward back-testing is deliberately not part of the standard update because it can be expensive. It should be added later as an optional audit script.
+
+---
+
+## EDGE AI v2.8.0 - Strategy Benchmark Suite
+
+This release adds the Strategy Benchmark Suite without replacing the existing v2 model architecture.
+
+### New files
+
+- `models/strategy_benchmark.py`
+- `scripts/run_strategy_benchmark.py`
+- `outputs/strategy_benchmark_results.csv`
+- `outputs/strategy_benchmark_summary.csv`
+- `outputs/strategy_benchmark_summary.json`
+- `PROJECT_STATE.md`
+- `CHANGELOG.md`
+
+### What the benchmark does
+
+The benchmark compares EDGE AI against simple baseline strategies:
+
+- Random
+- Hot Numbers
+- Cold Numbers
+- Overdue
+- Recent Repeat
+- Pair Frequency
+- Triplet Frequency
+- Balanced Hot
+
+The EDGE AI benchmark path uses the actual model chain:
+
+```text
+score_numbers -> score_pairs -> score_triplets -> score_combinations
+```
+
+This is important. It means the benchmark tests the same ensemble logic used by the app, not a fake simplified EDGE score.
+
+### Run benchmark only
+
+```powershell
+python scripts\run_strategy_benchmark.py
+```
+
+For a heavier full audit:
+
+```powershell
+python scripts\run_strategy_benchmark.py --step 1
+```
+
+### Run complete model update
+
+```powershell
+python scripts\run_model_update.py
+```
+
+This now regenerates the normal prediction outputs and the sampled benchmark outputs.
+
+### Streamlit
+
+The app now includes a `Strategy Benchmark` page.
+
